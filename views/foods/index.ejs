@@ -1,0 +1,42 @@
+<%# Include shared navbar partial for consistent navigation %>
+<%- include('../partials/_navbar') %>
+
+<%# Display heading for current user's pantry, showing their username %>
+<h1><%= user.username %>’s Pantry</h1>
+
+<%# Link to the form for adding a new pantry item %>
+<a href="/users/<%= user._id %>/foods/new">+ Add New Item</a>
+
+<%# Begin list of pantry items %>
+<ul>
+  <%# Check if there are any items in the pantry array %>
+  <% if (pantry.length) { %>
+    <%# Loop over each item in the pantry array %>
+    <% pantry.forEach(item => { %>
+      <li>
+        <%# Show the item name in bold %>
+        <strong><%= item.name %></strong>
+        <%# Link to edit this specific item by its _id %>
+        <a href="/users/<%= user._id %>/foods/<%= item._id %>/edit">Edit</a>
+
+        <%# Form to delete the item:
+             - action posts to the item's URL
+             - method POST with hidden _method=DELETE to override
+             - inline styling to keep link and button on the same line %>
+        <form
+          action="/users/<%= user._id %>/foods/<%= item._id %>"
+          method="POST"
+          style="display:inline"
+        >
+          <%# Hidden input that signals methodOverride middleware to treat as DELETE %>
+          <input type="hidden" name="_method" value="DELETE">
+          <%# Button that submits the form %>
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+    <% }) %>
+  <% } else { %>
+    <%# If pantry is empty, show placeholder message %>
+    <li>No items yet.</li>
+  <% } %>
+</ul>

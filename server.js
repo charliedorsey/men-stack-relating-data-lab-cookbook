@@ -1,49 +1,49 @@
-const dotenv = require('dotenv');
-dotenv.config();
-const express = require('express');
-const app = express();
-const mongoose = require('mongoose');
-const methodOverride = require('method-override');
-const morgan = require('morgan');
-const session = require('express-session');
+// server.js
 
-const authController = require('./controllers/auth.js');
+// 1. Load environment variables from `.env` into process.env
+require('dotenv').config()
 
-const port = process.env.PORT ? process.env.PORT : '3000';
+// 2. Pull in all our dependencies
+const express        = require('express')            // web framework
+const mongoose       = require('mongoose')           // MongoDB ORM
+const methodOverride = require('method-override')    // allow PUT/DELETE from HTML forms
+const session        = require('express-session')    // session middleware
+const path           = require('path')               // Node core module for file paths
 
-mongoose.connect(process.env.MONGODB_URI);
+// 3. Import our own modules
+const passUser   = require('./middleware/pass-user-to-view') // make `req.session.user` available in all templates
+const isSignedIn = require('./middleware/is-signed-in')      // guard to block unauthenticated access
+const authRoutes = require('./controllers/auth')             // signup / signin routes
+const foodRoutes = require('./controllers/foods')            // nested `foods` CRUD routes
+const userRoutes = require('./controllers/users')            // community user listing & profiles
+const User       = require('./models/user')                  // Mongoose model for users
 
-mongoose.connection.on('connected', () => {
-  console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
-});
+// 4. Create the Express “app” and define port
+const app  = express()
+const PORT = process.env.PORT || 3000
 
-app.use(express.urlencoded({ extended: false }));
-app.use(methodOverride('_method'));
-// app.use(morgan('dev'));
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+// ────────────────────────────────────────────────────────────────────────────────
+// TEMPLATING SETUP
+// ────────────────────────────────────────────────────────────────────────────────
 
-app.get('/', (req, res) => {
-  res.render('index.ejs', {
-    user: req.session.user,
-  });
-});
+// 5. Tell Express where to find our EJS templates
+app.set('views', path.join(__dirname, 'views'))
+// 6. Tell Express that we’ll use EJS to render those templates
+app.set('view engine', 'ejs')
 
-app.get('/vip-lounge', (req, res) => {
-  if (req.session.user) {
-    res.send(`Welcome to the party ${req.session.user.username}.`);
-  } else {
-    res.send('Sorry, no guests allowed.');
-  }
-});
+// ────────────────────────────────────────────────────────────────────────────────
+// MIDDLEWARE
+// ────────────────────────────────────────────────────────────────────────────────
 
-app.use('/auth', authController);
+// 7. Parse URL‑encoded form bodies so req.body works
+app.use(express.urlencoded({ extended: true }))
+// 8. Look for a `_method` field in those forms and treat it as the HTTP method
+app.use(methodOverride('_method'))
 
-app.listen(port, () => {
-  console.log(`The express app is ready on port ${port}!`);
-});
+// 9. Configure session support
+app.use(session({
+  secret: process.env.SESSION_SECRET, // used to sign the session ID cookie
+  resave: false,                      // don’t save session if nothing changed
+  saveUninitialized: false            // don’t make a session until something’s stored
+}))
+// 10. Inject `res.locals.user = req.session.user

@@ -1,0 +1,19 @@
+<%- include('partials/_navbar') %>
+
+<main>
+  <h1>Welcome to the party, <%= user.username %>!</h1>
+  <section>
+    <h2>🗝️ VIP Secrets</h2>
+    <ul>
+        </li>
+      <li>
+        Your pantry has <%= user.pantry.length %> items—perfect for late‑night snacks!
+      </li>
+      <li>
+        <a href="/users/<%= user._id %>/foods">
+          View &amp; edit your pantry
+        </a>
+      </li>
+    </ul>
+  </section>
+</main>

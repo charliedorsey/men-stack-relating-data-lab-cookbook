@@ -1,0 +1,45 @@
+<%# Include the shared navbar for consistent navigation across pages %>
+<%- include('../partials/_navbar') %>
+
+<%# Display a dynamic heading: "Add New" if no existing item object, else "Edit" %>
+<h1>
+  <%= typeof item === 'undefined'  
+        ? 'Add New'               // No `item` passed — we’re creating a new pantry item
+        : 'Edit'                  // `item` exists — we’re editing an existing one
+  %> Pantry Item
+</h1>
+
+<%# Begin form for creating or updating a pantry item %>
+<form
+  <%# Determine the correct form action URL:
+       - If `item` is undefined (new), POST to the user’s foods index to create
+       - If `item` exists (edit), POST with _method=PUT to update that specific item
+  %>
+  action="<%=
+    typeof item === 'undefined'
+      ? `/users/${user._id}/foods`                        // CREATE route
+      : `/users/${user._id}/foods/${item._id}?_method=PUT` // UPDATE with method override
+  %>"
+  method="POST"  <%# Always use POST; methodOverride handles PUT when present %>
+>
+  <%# Label for clarity %>
+  <label for="name">Name:</label>
+  
+  <%# Input field for the item’s name:
+       - Pre-fill with `item.name` if editing
+       - Otherwise leave blank for new entries
+       - `required` ensures form cannot submit empty
+  %>
+  <input
+    id="name"
+    name="name"
+    type="text"
+    value="<%= item?.name || '' %>"
+    required
+  >
+
+  <%# Submit button text changes based on context %>
+  <button type="submit">
+    <%= item ? 'Update' : 'Create' %>
+  </button>
+</form>

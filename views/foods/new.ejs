@@ -1,0 +1,14 @@
+<%- include('../partials/_navbar') %>
+
+<h1>Add a Pantry Item</h1>
+
+<form action="/users/<%= user._id %>/foods" method="POST">
+  <label for="name">Name</label>
+  <input
+    id="name"
+    name="name"
+    type="text"
+    required
+  >
+  <button type="submit">Create</button>
+</form>

@@ -1,0 +1,7 @@
+<%- include('../partials/_navbar') %>
+<h1><%= user.username %>’s Pantry</h1>
+<ul>
+  <% user.pantry.forEach(f => { %>
+    <li><%= f.name %></li>
+  <% }) %>
+</ul>
